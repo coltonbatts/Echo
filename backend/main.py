@@ -3,6 +3,17 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from .mcp_client import discover_tools
+import os
+from dotenv import load_dotenv
+import openai
+
+# Load environment variables from .env at project root
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4o-nano')
+
+openai.api_key = OPENAI_API_KEY
 
 app = FastAPI()
 
@@ -18,10 +29,20 @@ app.add_middleware(
 class EchoRequest(BaseModel):
     message: str
 
-# Placeholder LLM router
+# OpenAI LLM router
 def llm_router(message: str) -> str:
-    # TODO: Route to local/API LLMs (OpenAI, Claude, Ollama, etc)
-    return f"[Echo] You said: {message} (mock response)"
+    if not OPENAI_API_KEY:
+        return "[Echo] Error: OPENAI_API_KEY is not set."
+    try:
+        response = openai.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=[{"role": "user", "content": message}],
+            max_tokens=256,
+            temperature=0.7,
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        return f"[Echo] OpenAI API error: {e}"
 
 @app.post("/api/echo")
 async def echo_endpoint(req: EchoRequest):

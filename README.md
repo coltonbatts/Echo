@@ -27,8 +27,9 @@ All orchestrated through a single, clean interface. No vendor lock-in. Maximum f
 [ User (browser) ]
         |
         v
-[ Frontend (index.html) ]
+[ Frontend (nginx: serves index.html, proxies /api) ]
         |
+   (proxy /api)
         v
 [ Backend (FastAPI: /api/echo) ]
         |
@@ -36,7 +37,17 @@ All orchestrated through a single, clean interface. No vendor lock-in. Maximum f
 [ LLM Router / MCP Client ]
 ```
 
-- **Frontend** is static and not served by the backend. Open it directly from the `frontend/` folder.
+- **Frontend** is now served by an Nginx container at [http://localhost](http://localhost). All API calls from the frontend use relative paths (e.g., `/api/echo`) and are transparently proxied to the backend container.
+- **Backend** exposes API endpoints (mainly `/api/echo`) and loads config from `echo.config.json`.
+- **LLM Router** is ready to connect to OpenAI, Claude, Ollama, etc. (currently stubbed)
+- **MCP Client** is stubbed for future modular tool invocation.
+
+**New files:**
+- `Dockerfile.frontend` (nginx-based static server)
+- `nginx.conf` (proxies /api to backend)
+
+
+- **Frontend** is containerized and served by Nginx at [http://localhost](http://localhost) in Docker mode. For local dev, you can still open `frontend/index.html` directly, but all production and Docker usage should go through the Nginx container.
 - **Backend** exposes API endpoints (mainly `/api/echo`) and loads config from `echo.config.json`.
 - **LLM Router** is ready to connect to OpenAI, Claude, Ollama, etc. (currently stubbed)
 - **MCP Client** is stubbed for future modular tool invocation.
@@ -108,24 +119,18 @@ cd Echo
    uvicorn backend.main:app --reload
    ```
 3. **Open the frontend**
-   - Open `frontend/index.html` directly in your browser.
+   - Open `http://localhost:8000` in your browser.
 
 ### 4. Docker (Recommended for full isolation)
-1. **Build and run**
-   ```bash
-   docker compose up --build
-   ```
-   - Backend: [http://localhost:8000](http://localhost:8000)
-   - API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
-2. **Frontend:** Open `frontend/index.html` (not served by backend)
-3. **Live reload:** Code changes are reflected automatically in the container if you use volume mounts (default in `docker-compose.yml`).
-   - To force reload, restart the container: `docker compose restart`
-
-1. **Build and run**
-   ```bash
-   docker compose up --build
-   ```
-   - Backend: [http://localhost:8000](http://localhost:8000)
+1. **Build and run everything**
+    ```bash
+    docker compose up --build
+    ```
+    - **Frontend:** [http://localhost](http://localhost) ← served by Nginx container, proxies API calls to backend
+    - **Backend:** [http://localhost:8000](http://localhost:8000) (API only; not for direct user access)
+    - **API docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+2. **Live reload:** Code changes are reflected automatically in the containers if you use volume mounts (default in `docker-compose.yml`).
+    - To force reload, restart the containers: `docker compose restart`
    - API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 2. **Frontend:** Open `frontend/index.html` (not served by backend)
 3. **Live reload:** Code changes are reflected automatically in the container.

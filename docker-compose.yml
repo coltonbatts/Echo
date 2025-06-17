@@ -7,9 +7,19 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-    # Option 1: Load variables from echo.config.json (preferred for this app)
-    # Option 2: Or mount an .env file and use env_file: .env
-    # Uncomment below if using .env:
-    # env_file: .env
-    # For echo.config.json, app should load config from this file at runtime
+    env_file: .env
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: echo-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - echo-backend
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf
     restart: unless-stopped
