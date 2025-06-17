@@ -74,7 +74,6 @@ echo/
 │   └── base_prompt.yaml
 ├── frontend/
 │   └── index.html         # Tailwind-based UI (static)
-├── echo.config.json       # API keys, MCP endpoints
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
@@ -84,16 +83,14 @@ echo/
 
 ## Configuration
 
-Edit `echo.config.json` to set your API keys and endpoints:
-```json
-{
-  "openai_api_key": "sk-PLACEHOLDER",
-  "claude_api_key": "claude-PLACEHOLDER",
-  "ollama_endpoint": "http://localhost:11434",
-  "mcp_server_url": "http://localhost:8001"
-}
+Create a `.env` file in the project root to set your API keys and endpoints. Example:
+```env
+OPENAI_API_KEY=sk-PLACEHOLDER
+CLAUDE_API_KEY=claude-PLACEHOLDER
+OLLAMA_ENDPOINT=http://localhost:11434
+MCP_SERVER_URL=http://localhost:8001
 ```
-- This file is required for backend operation. Do **not** commit real keys to version control.
+- The `.env` file is required for backend operation. Do **not** commit real keys to version control.
 
 ---
 
@@ -106,7 +103,7 @@ cd Echo
 ```
 
 ### 2. Set up configuration
-- Copy `echo.config.example.json` to `echo.config.json` and add your API keys or endpoints as needed.
+- Copy `.env.example` to `.env` and add your API keys or endpoints as needed.
 - **Never commit real keys to version control!**
 
 ### 3. Local Development

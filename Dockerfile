@@ -10,7 +10,6 @@ RUN pip install --no-cache-dir fastapi uvicorn[standard] openai pyyaml
 # Copy only necessary files
 COPY backend/ ./backend/
 COPY prompts/ ./prompts/
-COPY echo.config.json ./
 
 # Expose port
 EXPOSE 8000
