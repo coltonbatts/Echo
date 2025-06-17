@@ -1,13 +1,20 @@
 # Echo
 
-A modular, local-first creative-tech assistant. Lightweight, cinematic, and personal. Built for creative technologists who want a hackable LLM companion that runs locally but can connect to cloud LLMs and MCP servers.
+A modular AI infrastructure platform for creative technologists. Echo serves as a unified orchestration layer for heterogeneous LLMs, MCP servers, and autonomous agents—your Swiss Army knife for AI workloads.
+
+Built Docker-first for maximum portability and vendor independence. Connect any LLM provider, integrate any MCP-compliant tool, compose sophisticated AI workflows from interchangeable components.
 
 ---
 
-## Project Overview
-Echo is a local-first chat assistant with a modern, minimalist frontend and a FastAPI backend. It is designed for rapid prototyping of LLM-based tools and creative workflows. The backend is ready for real LLM API integration and MCP (Modular Command Protocol) server communication.
+## Vision: Modular AI Composition
 
-- **Frontend:** Static HTML/CSS (Tailwind), chat UI, open in browser
+Echo breaks free from monolithic AI platforms by treating intelligence as composable modules. Mix and match:
+
+- **LLM Providers**: OpenAI, Anthropic Claude, local Ollama models, or emerging providers
+- **MCP Tools**: Web search, file operations, databases, APIs—any MCP-compliant server
+- **Agent Workflows**: Chain reasoning, tool usage, and decision logic into autonomous processes
+
+All orchestrated through a single, clean interface. No vendor lock-in. Maximum flexibility.
 - **Backend:** FastAPI, `/api/echo` endpoint, pluggable LLM router, ready for OpenAI/Claude/Ollama
 - **Config:** `echo.config.json` for API keys and server endpoints
 - **Docker:** Fully containerized for dev and prod
