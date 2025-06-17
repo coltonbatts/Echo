@@ -1,0 +1,17 @@
+# Echo .gitignore
+__pycache__/
+*.pyc
+.env
+.DS_Store
+echo.config.json
+venv/
+.dockerignore
+# Node/npm junk (if ever added)
+node_modules/
+# Editor/IDE files
+*.swp
+*.swo
+.idea/
+.vscode/
+# OS junk
+Thumbs.db

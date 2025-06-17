@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  echo-backend:
+    build: .
+    container_name: echo-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    # Option 1: Load variables from echo.config.json (preferred for this app)
+    # Option 2: Or mount an .env file and use env_file: .env
+    # Uncomment below if using .env:
+    # env_file: .env
+    # For echo.config.json, app should load config from this file at runtime
+    restart: unless-stopped

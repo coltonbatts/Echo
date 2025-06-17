@@ -1,0 +1,6 @@
+{
+  "openai_api_key": "sk-PLACEHOLDER",
+  "claude_api_key": "claude-PLACEHOLDER",
+  "ollama_endpoint": "http://localhost:11434",
+  "mcp_server_url": "http://localhost:8001"
+}
