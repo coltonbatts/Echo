@@ -1,4 +1,16 @@
 # backend/main.py
+"""FastAPI server that connects the frontend with LLMs and MCP tools.
+
+Endpoints:
+    * ``/api/tools`` -- list tools discovered from MCP servers
+    * ``/api/echo``  -- route a user message through an LLM and optional tools
+
+Key helpers:
+    ``llm_router`` routes text to OpenAI,
+    ``get_mcp_tools`` caches tool discovery,
+    ``find_relevant_tool`` picks a tool based on simple keywords.
+"""
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
