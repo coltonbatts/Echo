@@ -1,5 +1,16 @@
 # Echo Black-Green Terminal Chat
 
+![version](https://img.shields.io/badge/version-0.1-green)
+
+---
+
+**Version 0.1 – June 18, 2025**
+- 🟢 First working checkpoint: Docker + backend + React dev server + chat proxy integration
+- ✅ All smoke tests passing (backend, frontend, chat API, OpenAI relay)
+- See below for setup and usage steps.
+
+---
+
 This project includes a retro, green-on-black terminal-style chat interface built in React. The chat pane lives in the center of a Linux tiling window manager-inspired grid layout and communicates with a backend (via `/api/echo`) to provide ChatGPT-powered conversations.
 
 ## Features
@@ -31,6 +42,12 @@ This project includes a retro, green-on-black terminal-style chat interface buil
    Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ---
+
+## v0.1 Changelog
+- Initial working integration of backend (FastAPI), frontend (Nginx), and React dev chat app.
+- ChatBox now proxies `/api/echo` to backend via `src/setupProxy.js`.
+- All containers and dev tools run via Docker Compose and `npm start`.
+- All smoke tests pass: backend health, frontend loads, chat API connects, OpenAI relay works.
 
 # Getting Started with Create React App
 

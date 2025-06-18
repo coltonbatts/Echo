@@ -1,10 +1,46 @@
 # Echo
 
+![version](https://img.shields.io/badge/version-0.1-green)
+
 **A modular AI infrastructure platform for creative technologists.**
 
-Echo breaks free from monolithic AI platforms by treating intelligence as composable modules. Mix and match LLM providers, integrate MCP-compliant tools, and orchestrate sophisticated AI workflows—all through a unified, vendor-agnostic interface.
+---
 
-Built Docker-first for maximum portability. No vendor lock-in. Maximum flexibility.
+**Version 0.1 – June 18, 2025**
+- 🟢 First working checkpoint: Docker Compose, backend (FastAPI), frontend (Nginx), React dev server, and chat proxy integration
+- ✅ All smoke tests passing (backend health, frontend loads, React chat API, OpenAI relay)
+- See below for setup and usage steps.
+
+---
+
+## v0.1 Changelog
+- Initial working integration of backend (FastAPI), frontend (Nginx), and React dev chat app.
+- ChatBox in React proxies `/api/echo` to backend via `src/setupProxy.js`.
+- All containers and dev tools run via Docker Compose and `npm start`.
+- All smoke tests pass: backend health, frontend loads, chat API connects, OpenAI relay works.
+
+## 🚀 v0.1 Setup & Usage
+1. **Clone the repo and copy `.env.example` to `.env`**
+   - Add your `OPENAI_API_KEY` and any other required secrets.
+2. **Start all services:**
+   ```bash
+   docker compose up -d --build
+   ```
+   - Backend: [http://localhost:8000](http://localhost:8000) (API)
+   - Frontend: [http://localhost/](http://localhost/) (Nginx)
+3. **Run the React dev app:**
+   ```bash
+   cd echo-blackgreen
+   npm install
+   npm start
+   ```
+   - React dev: [http://localhost:3000](http://localhost:3000)
+   - ChatBox will now connect to backend via proxy for `/api/echo` requests.
+4. **Smoke tests:**
+   - Backend health: `curl http://localhost:8000/` (should return 404 or health JSON)
+   - Frontend: Open [http://localhost/](http://localhost/) in browser
+   - React dev: Open [http://localhost:3000](http://localhost:3000) and test chat
+   - Chat API: Enter message in chat; should get OpenAI-powered response
 
 ---
 
