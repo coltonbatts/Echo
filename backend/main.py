@@ -21,7 +21,6 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
 CLAUDE_API_KEY = os.getenv('CLAUDE_API_KEY')
 OLLAMA_ENDPOINT = os.getenv('OLLAMA_ENDPOINT')
-MCP_SERVER_URL = os.getenv('MCP_SERVER_URL')
 
 openai.api_key = OPENAI_API_KEY
 

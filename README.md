@@ -78,6 +78,14 @@ cp .env.example .env
 # Edit .env with your API keys
 ```
 
+### Environment Variables
+The `.env` file controls API keys and MCP tool settings. Important variables:
+
+- `OPENAI_API_KEY` – OpenAI authentication (optional)
+- `MCP_SERVER_URLS` – comma-separated list of MCP server endpoints
+- `MCP_DISCOVERY_TIMEOUT` – tool discovery timeout (seconds)
+- `MCP_EXECUTION_TIMEOUT` – tool execution timeout (seconds)
+
 ### 2. Launch with Docker (Recommended)
 ```bash
 docker compose up --build
