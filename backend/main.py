@@ -36,6 +36,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/api/tools")
+async def list_tools():
+    tools = await get_mcp_tools()
+    # Flatten tool list for frontend: [{name, description, server_url}]
+    flat_tools = []
+    for server_url, tool_list in (tools or {}).items():
+        for tool in tool_list:
+            flat_tools.append({
+                "name": tool.get("name"),
+                "description": tool.get("description", ""),
+                "server_url": server_url
+            })
+    return {"tools": flat_tools}
+
 class EchoRequest(BaseModel):
     message: str
 

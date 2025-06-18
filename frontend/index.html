@@ -67,18 +67,56 @@
         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition">Send</button>
       </form>
     </div>
+    <!-- Tools Panel: moved directly below chat box, visually integrated -->
+    <div id="tools-panel" class="mt-4 w-full max-w-md mx-auto bg-neutral-900 rounded-xl shadow-lg p-4 border border-neutral-800 flex flex-col items-start">
+      <div class="font-semibold text-indigo-300 mb-2 text-sm">Available MCP Tools</div>
+      <ul id="tools-list" class="space-y-1 text-xs"></ul>
+    </div>
   </main>
   <div class="mt-10 text-xs text-neutral-500 text-center w-full">Echo v0.1</div>
   <script>
     const chatArea = document.getElementById('chat-area');
     const chatForm = document.getElementById('chat-form');
     const messageInput = document.getElementById('message-input');
+    const toolsList = document.getElementById('tools-list');
+
+    // Fetch and display available MCP tools
+    async function loadTools() {
+      try {
+        const res = await fetch('/api/tools');
+        const data = await res.json();
+        toolsList.innerHTML = '';
+        if (data.tools && data.tools.length > 0) {
+          data.tools.forEach(tool => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="font-medium text-indigo-300">${tool.name}</span> <span class="text-neutral-400">— ${tool.description}</span>`;
+            toolsList.appendChild(li);
+          });
+        } else {
+          toolsList.innerHTML = '<li class="text-neutral-400">No tools available.</li>';
+        }
+      } catch {
+        toolsList.innerHTML = '<li class="text-red-400">Failed to load tools.</li>';
+      }
+    }
+    loadTools();
 
     function addMessage(text, sender = 'user') {
       const msg = document.createElement('div');
       msg.className = `p-4 rounded-lg mb-2 max-w-[85%] fade-in ${sender === 'user' ? 'bg-indigo-600 ml-auto text-white' : 'bg-gray-800 mr-auto text-gray-100'}`;
       msg.innerText = text;
       chatArea.appendChild(msg);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function addToolUsage(tool) {
+      const toolDiv = document.createElement('div');
+      toolDiv.className = 'mb-1 px-3 py-2 rounded bg-indigo-950 text-indigo-200 text-xs font-medium shadow-sm border border-indigo-700 max-w-[80%] mr-auto fade-in';
+      let toolText = `Tool Used: ${tool.name}`;
+      if (tool.result) toolText += ` — result: ${tool.result}`;
+      if (tool.parameters) toolText += ` (params: ${JSON.stringify(tool.parameters)})`;
+      toolDiv.innerText = toolText;
+      chatArea.appendChild(toolDiv);
       chatArea.scrollTop = chatArea.scrollHeight;
     }
 
@@ -96,6 +134,10 @@
           body: JSON.stringify({ message })
         });
         const data = await res.json();
+        // Show tool usage if any
+        if (data.tools_used && Array.isArray(data.tools_used) && data.tools_used.length > 0) {
+          data.tools_used.forEach(tool => addToolUsage(tool));
+        }
         addMessage(data.response, 'echo');
       } catch {
         addMessage('[Echo] Backend unavailable.', 'echo');
