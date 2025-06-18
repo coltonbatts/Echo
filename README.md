@@ -147,6 +147,9 @@ cd Echo
 - `GET /docs` – FastAPI interactive API docs
 - `GET /` – Not implemented (returns 404 by design)
 
+### Sample MCP Server for Local Testing
+See [docs/sample_mcp_server.md](docs/sample_mcp_server.md) for a minimal example server you can run locally.
+
 ---
 
 ## Development Notes
