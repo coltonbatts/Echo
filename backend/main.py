@@ -2,7 +2,14 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from .mcp_client import discover_tools
+from .mcp_client import (
+    list_mcp_servers,
+    discover_all_tools,
+    execute_tool,
+    MCPClientError
+)
+import time
+import asyncio
 import os
 from dotenv import load_dotenv
 import openai
@@ -47,7 +54,76 @@ def llm_router(message: str) -> str:
     except Exception as e:
         return f"[Echo] OpenAI API error: {e}"
 
+# --- MCP Tool Discovery Cache ---
+MCP_TOOLS_CACHE = {}
+MCP_TOOLS_LAST_REFRESH = 0
+MCP_TOOLS_REFRESH_INTERVAL = 60  # seconds
+
+async def get_mcp_tools(force_refresh: bool = False):
+    global MCP_TOOLS_CACHE, MCP_TOOLS_LAST_REFRESH
+    now = time.time()
+    if force_refresh or (now - MCP_TOOLS_LAST_REFRESH > MCP_TOOLS_REFRESH_INTERVAL):
+        try:
+            MCP_TOOLS_CACHE = await discover_all_tools()
+            MCP_TOOLS_LAST_REFRESH = now
+        except Exception:
+            pass  # If discovery fails, keep old cache
+    return MCP_TOOLS_CACHE
+
+# --- Tool Usage Heuristic ---
+TOOL_KEYWORDS = ["calculate", "calculation", "math", "sum", "add", "subtract", "multiply", "divide", "search", "web", "lookup"]
+
+def find_relevant_tool(user_message: str, mcp_tools: dict) -> tuple:
+    msg_lower = user_message.lower()
+    for server_url, tools in mcp_tools.items():
+        for tool in tools:
+            for keyword in TOOL_KEYWORDS:
+                if keyword in msg_lower and keyword in tool["name"].lower():
+                    return server_url, tool["name"], tool
+                if keyword in msg_lower and keyword in tool.get("description", "").lower():
+                    return server_url, tool["name"], tool
+    return None, None, None
+
 @app.post("/api/echo")
 async def echo_endpoint(req: EchoRequest):
-    response = llm_router(req.message)
-    return {"response": response}
+    start_time = time.time()
+    tools_used = []
+    mcp_tools = await get_mcp_tools()
+    server_url, tool_name, tool_info = find_relevant_tool(req.message, mcp_tools)
+    tool_result = None
+    tool_error = None
+    # Try tool if relevant
+    if server_url and tool_name:
+        # Simple parameter extraction: pass whole message as 'query' or 'expression' if tool expects it
+        params = {}
+        if "expression" in (tool_info.get("parameters", {}) or {}):
+            params = {"expression": req.message}
+        elif "query" in (tool_info.get("parameters", {}) or {}):
+            params = {"query": req.message}
+        else:
+            params = {k: req.message for k in (tool_info.get("parameters", {}) or {}).keys()}
+        try:
+            tool_result = await execute_tool(server_url, tool_name, params)
+            tools_used.append({
+                "name": tool_name,
+                "parameters": params,
+                "result": tool_result.get("result", tool_result)
+            })
+        except MCPClientError as e:
+            tool_error = str(e)
+        except Exception as e:
+            tool_error = f"Unexpected MCP error: {e}"
+    # Compose LLM context with tool result if available
+    llm_context = req.message
+    if tool_result:
+        llm_context += f"\n\n[Tool {tool_name} result: {tool_result.get('result', tool_result)}]"
+    elif tool_error:
+        llm_context += f"\n\n[Tool {tool_name} error: {tool_error}]"
+    response = llm_router(llm_context)
+    end_time = time.time()
+    return {
+        "response": response,
+        "tools_used": tools_used,
+        "model_used": OPENAI_MODEL,
+        "processing_time": round(end_time - start_time, 2)
+    }
