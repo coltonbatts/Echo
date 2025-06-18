@@ -147,6 +147,15 @@ cd Echo
 - **Docker:** Lightweight, production-ready config. Mounts code for live reload.
 - **Extending:** Add new LLMs/tools by editing `llm_router.py` and `mcp_client.py`.
 
+### Running Tests
+Echo includes a small pytest suite under `tests/`.
+
+```bash
+pip install -r backend/requirements.txt
+pip install pytest respx
+pytest
+```
+
 ---
 
 ## Roadmap
