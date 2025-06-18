@@ -1,7 +1,14 @@
 # backend/mcp_client.py
-"""
-Async-only MCP client for discovering tools and executing tool calls.
-All stub/mock (non-async) code has been removed.
+"""Async client for interacting with Modular Command Protocol (MCP) servers.
+
+Core functions include:
+    ``list_mcp_servers``  -- read configured server URLs
+    ``discover_tools``    -- query a single server for its tools
+    ``get_tool_schema``   -- fetch a tool's JSON schema
+    ``execute_tool``      -- run a tool with parameter validation
+    ``discover_all_tools``-- gather tools from all servers
+
+All networking is performed with ``httpx`` using asyncio.
 """
 
 import os
