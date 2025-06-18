@@ -1,103 +1,103 @@
 # Echo
 
-A modular AI infrastructure platform for creative technologists. Echo serves as a unified orchestration layer for heterogeneous LLMs, MCP servers, and autonomous agents—your Swiss Army knife for AI workloads.
+**A modular AI infrastructure platform for creative technologists.**
 
-Built Docker-first for maximum portability and vendor independence. Connect any LLM provider, integrate any MCP-compliant tool, compose sophisticated AI workflows from interchangeable components.
+Echo breaks free from monolithic AI platforms by treating intelligence as composable modules. Mix and match LLM providers, integrate MCP-compliant tools, and orchestrate sophisticated AI workflows—all through a unified, vendor-agnostic interface.
 
----
-
-## Vision: Modular AI Composition
-
-Echo breaks free from monolithic AI platforms by treating intelligence as composable modules. Mix and match:
-
-- **LLM Providers**: OpenAI, Anthropic Claude, local Ollama models, or emerging providers
-- **MCP Tools**: Web search, file operations, databases, APIs—any MCP-compliant server
-- **Agent Workflows**: Chain reasoning, tool usage, and decision logic into autonomous processes
-
-All orchestrated through a single, clean interface. No vendor lock-in. Maximum flexibility.
-- **Backend:** FastAPI, `/api/echo` endpoint, pluggable LLM router, ready for OpenAI/Claude/Ollama
-- **Config:** `echo.config.json` for API keys and server endpoints
-- **Docker:** Fully containerized for dev and prod
+Built Docker-first for maximum portability. No vendor lock-in. Maximum flexibility.
 
 ---
 
-## Architecture
+## 🎯 Vision: Modular AI Composition
+
+Traditional AI platforms lock you into their ecosystem. Echo does the opposite—it's designed as an orchestration layer that composes heterogeneous AI capabilities:
+
+- **🧠 LLM Providers**: OpenAI, Anthropic Claude, local Ollama models, or emerging providers
+- **🔧 MCP Tools**: Web search, file operations, databases, APIs—any MCP-compliant server
+- **🤖 Agent Workflows**: Chain reasoning, tool usage, and decision logic into autonomous processes
+- **🔄 Dynamic Discovery**: Tools and capabilities are discovered at runtime, not hardcoded
+
+All orchestrated through a single, clean interface that adapts to your workflow.
+
+---
+
+## 🏗️ Architecture
 
 ```
-[ User (browser) ]
-        |
-        v
-[ Frontend (nginx: serves index.html, proxies /api) ]
-        |
-   (proxy /api)
-        v
-[ Backend (FastAPI: /api/echo) ]
-        |
-        v
-[ LLM Router / MCP Client ]
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │    Backend      │    │  External APIs  │
+│   (Nginx)       │────│   (FastAPI)     │────│  & MCP Servers  │
+│                 │    │                 │    │                 │
+│ • Modern UI     │    │ • LLM Router    │    │ • OpenAI/Claude │
+│ • Tool Display  │    │ • MCP Client    │    │ • Ollama        │
+│ • Live Updates  │    │ • Tool Executor │    │ • Custom Tools  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-- **Frontend** is now served by an Nginx container at [http://localhost](http://localhost). All API calls from the frontend use relative paths (e.g., `/api/echo`) and are transparently proxied to the backend container.
-- **Backend** exposes API endpoints (mainly `/api/echo`) and loads config from `echo.config.json`.
-- **LLM Router** is ready to connect to OpenAI, Claude, Ollama, etc. (currently stubbed)
-- **MCP Client** is stubbed for future modular tool invocation.
+### Core Components
 
-**New files:**
-- `Dockerfile.frontend` (nginx-based static server)
-- `nginx.conf` (proxies /api to backend)
-
-
-- **Frontend** is containerized and served by Nginx at [http://localhost](http://localhost) in Docker mode. For local dev, you can still open `frontend/index.html` directly, but all production and Docker usage should go through the Nginx container.
-- **Backend** exposes API endpoints (mainly `/api/echo`) and loads config from `echo.config.json`.
-- **LLM Router** is ready to connect to OpenAI, Claude, Ollama, etc. (currently stubbed)
-- **MCP Client** is stubbed for future modular tool invocation.
+- **Frontend**: Modern, dark-mode chat interface served by Nginx with live tool discovery
+- **Backend**: FastAPI server with pluggable LLM routing and async MCP integration
+- **LLM Router**: Intelligent model selection based on task requirements (OpenAI, Claude, Ollama)
+- **MCP Client**: Dynamic tool discovery, schema validation, and execution
+- **Tool Orchestration**: Automatic tool detection and intelligent parameter mapping
 
 ---
 
-## Features
-- Modern, dark-mode chat UI (Claude-style)
-- Local-first, privacy-focused architecture
-- Modular backend ready for LLM and MCP integration
-- Dockerized for easy setup and development
-- Live code reload in Docker via volume mount
+## ✨ Features
+
+### Current Capabilities
+- 🎨 **Modern Chat Interface**: Claude-style dark UI with real-time tool visibility
+- 🔌 **Modular LLM Support**: Easy switching between OpenAI, Claude, and local models
+- 🛠️ **MCP Tool Integration**: Automatic discovery and execution of MCP-compliant tools
+- 🐳 **Docker-First**: Fully containerized for development and production
+- 🔄 **Live Reload**: Code changes reflected instantly in development
+- 📊 **Tool Transparency**: See which tools are used and their results
+- ⚡ **Async Everything**: Non-blocking tool discovery and execution
+
+### Smart Tool Detection
+Echo automatically detects when to use tools based on message content:
+- **Math operations** → Calculator tools
+- **Web queries** → Search tools
+- **File operations** → File system tools
+- **API calls** → Custom MCP servers
 
 ---
 
-## Folder Structure
-```
-echo/
-├── backend/
-│   ├── main.py            # FastAPI server with /api/echo endpoint
-│   ├── llm_router.py      # LLM router (uses system prompt)
-│   └── mcp_client.py      # (stub for now)
-├── prompts/
-│   └── base_prompt.yaml
-├── frontend/
-│   └── index.html         # Tailwind-based UI (static)
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
+## 🚀 Quick Start
 
----
+### Prerequisites
+- Docker & Docker Compose
+- OpenAI API key (optional: Claude API key, Ollama setup)
 
-## Configuration
-
-Create a `.env` file in the project root to set your API keys and endpoints. Example:
-```env
-OPENAI_API_KEY=sk-PLACEHOLDER
-CLAUDE_API_KEY=claude-PLACEHOLDER
-OLLAMA_ENDPOINT=http://localhost:11434
-MCP_SERVER_URL=http://localhost:8001
-```
-- The `.env` file is required for backend operation. Do **not** commit real keys to version control.
-
----
-
-## Quickstart
-
-### 1. Clone the repo
+### 1. Clone and Configure
 ```bash
+git clone https://github.com/coltonbatts/Echo.git
+cd Echo
+cp .env.example .env
+# Edit .env with your API keys
+```
+
+### 2. Launch with Docker (Recommended)
+```bash
+docker compose up --build
+```
+
+- **🌐 Frontend**: [http://localhost](http://localhost)
+- **📚 API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **🔧 Tools API**: [http://localhost:8000/api/tools](http://localhost:8000/api/tools)
+
+### 3. Local Development (Advanced)
+```bash
+# Terminal 1: Backend
+pip install -r backend/requirements.txt
+uvicorn backend.main:app --reload
+
+# Terminal 2: Open frontend/index.html or serve it
+python -m http.server 3000 --directory frontend
+```
+
+---
 git clone https://github.com/coltonbatts/Echo.git
 cd Echo
 ```
