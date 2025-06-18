@@ -1,59 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const terminalStyle = {
-  background: "#101010",
-  color: "#00ff00",
-  fontFamily: "Fira Mono, JetBrains Mono, monospace",
-  border: "1.5px solid #00ff00",
-  borderRadius: "6px",
-  boxShadow: "0 0 8px #001a00",
-  padding: "1.2rem 1.5rem 1.2rem 1.2rem",
-  minHeight: 320,
-  maxHeight: 420,
-  overflowY: "auto",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "flex-end",
-  margin: 0,
-  position: "relative",
-  whiteSpace: "pre-wrap",
-};
-
-const inputRowStyle = {
-  display: "flex",
-  alignItems: "center",
-  width: "100%",
-  marginTop: 12,
-  borderTop: "1.5px solid #00ff00",
-  paddingTop: 10,
-};
-
-const inputStyle = {
-  flex: 1,
-  background: "#101010",
-  color: "#00ff00",
-  fontFamily: "Fira Mono, JetBrains Mono, monospace",
-  border: "none",
-  outline: "none",
-  fontSize: 16,
-  padding: "0.5rem 0.6rem",
-  caretColor: "#00ff00",
-  letterSpacing: 1,
-};
-
-const sendBtnStyle = {
-  background: "#00ff00",
-  color: "#101010",
-  border: "none",
-  borderRadius: 4,
-  fontWeight: 700,
-  fontFamily: "Fira Mono, JetBrains Mono, monospace",
-  fontSize: 16,
-  marginLeft: 12,
-  padding: "0.5rem 1.3rem",
-  cursor: "pointer",
-  transition: "background 0.2s",
-};
 
 const blinkStyle = {
   animation: "blink 1s step-end infinite",
@@ -150,25 +96,29 @@ export default function ChatBox() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
-      <div ref={chatRef} style={terminalStyle}>
+    <div className="flex flex-col h-full w-full">
+      <div
+        ref={chatRef}
+        className="bg-black text-green-400 font-mono border border-green-500 px-5 py-4 min-h-[320px] max-h-[420px] overflow-y-auto flex flex-col justify-end whitespace-pre-wrap"
+        style={{margin:0}}
+      >
         {messages.length === 0 && (
-          <div style={{ color: "#00800099", opacity: 0.6, fontStyle: "italic", marginBottom: 12 }}>
-            Welcome to <span style={{ color: "#00ff66" }}>Echo Terminal</span>. Type your message below.
+          <div className="text-green-700 italic mb-3 opacity-70">
+            Welcome to <span className="text-green-400">Echo Terminal</span>. Type your message below.
           </div>
         )}
         {messages.map((msg, i) => (
           <TerminalMessage key={i} text={msg.text} sender={msg.sender === "assistant" ? "assistant" : "user"} typewriter={msg.typewriter && msg.sender === "assistant"} />
         ))}
         {loading && (
-          <div style={{ color: "#00ff00", opacity: 0.7, fontStyle: "italic", marginTop: 8 }}>Echo is thinking<span style={blinkStyle}>█</span></div>
+          <div className="text-green-400 italic mt-2 opacity-80">Echo is thinking<span style={blinkStyle}>█</span></div>
         )}
       </div>
-      <form onSubmit={sendMessage} style={inputRowStyle}>
-        <span style={{ color: "#00ff00", fontWeight: 700, marginRight: 8 }}>&gt;</span>
+      <form onSubmit={sendMessage} className="flex items-center w-full mt-3 border-t border-green-500 pt-3">
+        <span className="text-green-400 font-bold mr-2">&gt;</span>
         <input
           ref={inputRef}
-          style={inputStyle}
+          className="flex-1 bg-black text-green-400 font-mono border-0 outline-none text-base px-2 py-1 caret-green-400 tracking-wider"
           type="text"
           autoComplete="off"
           value={input}
@@ -176,7 +126,11 @@ export default function ChatBox() {
           disabled={loading}
           placeholder="Type and hit Enter..."
         />
-        <button type="submit" style={sendBtnStyle} disabled={loading || !input.trim()}>
+        <button
+          type="submit"
+          className="ml-3 bg-green-900 text-green-200 font-mono font-bold px-4 py-1 border border-green-700 hover:bg-green-800 disabled:opacity-40"
+          disabled={loading || !input.trim()}
+        >
           Send
         </button>
       </form>
