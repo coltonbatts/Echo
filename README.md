@@ -19,6 +19,63 @@
 - All containers and dev tools run via Docker Compose and `npm start`.
 - All smoke tests pass: backend health, frontend loads, chat API connects, OpenAI relay works.
 
+---
+
+## 🆕 Enhanced MCP Architecture (June 2025)
+
+Echo now supports a robust, intelligent, and scalable Modular Command Protocol (MCP) ecosystem:
+
+### New MCP Servers
+- **File Operations Server** (`mcp_servers/file_server.py`): File reading/writing, directory ops, file search, binary support, sandboxed
+- **Web Search Server** (`mcp_servers/web_server.py`): DuckDuckGo search, webpage/content/link extraction, rate limiting, caching
+- **System Utilities Server** (`mcp_servers/system_server.py`): System info, performance, process management, safe command execution
+
+### Enhanced MCP Client
+- Parallel tool execution, health monitoring, TTL caching, retry logic, usage analytics
+
+### Intelligent Tool Selection
+- Entity extraction, intent detection, semantic analysis, learning from usage, confidence scoring
+
+### New API Endpoints
+- `/api/tools/stats`: MCP server and tool statistics
+- `/api/tools/recommendations`: Usage-based recommendations
+- `/api/tools/select`: Intelligent tool selection testing
+- Enhanced `/api/echo`: Parallel tool execution, smart parameter extraction
+
+### Management & Testing
+- `scripts/start_mcp_servers.py`: Start/stop/monitor all MCP servers
+- Full test suite: `tests/test_enhanced_mcp.py`
+- Updated `.env.example` and documentation
+
+**Key Improvements:**
+- Moves beyond keyword matching to semantic tool selection
+- Parallel execution and intelligent caching for performance
+- Health monitoring, retry logic, and error handling for reliability
+- Easy extensibility for new tool categories
+- Detailed statistics and usage tracking for observability
+
+**Usage:**
+```bash
+# Start all MCP servers (in a virtualenv)
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r backend/requirements.txt
+python scripts/start_mcp_servers.py
+
+# Test intelligent tool selection
+curl -X POST "http://localhost:8000/api/tools/select" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Search for Python tutorials", "max_tools": 3}'
+
+# Enhanced echo with intelligent selection
+curl -X POST "http://localhost:8000/api/echo" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Read the file config.txt", "use_intelligent_selection": true}'
+```
+
+See the CLAUDE.md for full documentation.
+
+---
+
 ## 🚀 v0.1 Setup & Usage
 1. **Clone the repo and copy `.env.example` to `.env`**
    - Add your `OPENAI_API_KEY` and any other required secrets.
