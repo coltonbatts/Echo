@@ -1,0 +1,28 @@
+environment: production
+debug: false
+log_level: INFO
+mcp:
+  servers:
+    - url: http://mcp-calculator:8001
+      name: calculator
+      timeout: 5.0
+      retries: 5
+    - url: http://mcp-file:8002
+      name: file_operations
+      timeout: 10.0
+      retries: 3
+    - url: http://mcp-web:8003
+      name: web_search
+      timeout: 20.0
+      retries: 3
+    - url: http://mcp-system:8004
+      name: system_utilities
+      timeout: 10.0
+      retries: 3
+  health_check_interval: 60.0
+  cache_ttl: 600.0
+web:
+  rate_limit: 100
+  cache_ttl: 3600
+enable_metrics: true
+enable_tracing: true

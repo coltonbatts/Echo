@@ -26,25 +26,22 @@ from .intelligent_tool_selector import get_intelligent_selector, ToolMatch
 
 import time
 import asyncio
-import os
-from dotenv import load_dotenv
 import openai
 import logging
+from backend.config import get_config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env at project root
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+# Load configuration
+config = get_config()
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
-CLAUDE_API_KEY = os.getenv('CLAUDE_API_KEY')
-OLLAMA_ENDPOINT = os.getenv('OLLAMA_ENDPOINT')
-USE_INTELLIGENT_SELECTION = os.getenv('USE_INTELLIGENT_SELECTION', 'true').lower() == 'true'
-
-openai.api_key = OPENAI_API_KEY
+openai.api_key = config.openai.api_key
+OPENAI_MODEL = config.openai.model
+CLAUDE_API_KEY = config.claude_api_key
+OLLAMA_ENDPOINT = config.ollama_endpoint
+USE_INTELLIGENT_SELECTION = config.use_intelligent_selection
 
 # Initialize enhanced MCP client and intelligent selector
 mcp_client = get_mcp_client()

@@ -1,0 +1,20 @@
+app_name: Echo
+app_version: 1.1.0
+openai:
+  model: gpt-4o-mini
+  max_tokens: 512
+  temperature: 0.7
+mcp:
+  discovery_timeout: 5.0
+  execution_timeout: 15.0
+  health_check_interval: 30.0
+  cache_ttl: 300.0
+  max_retries: 3
+  parallel_limit: 10
+web:
+  rate_limit: 10
+  cache_ttl: 300
+  max_content_length: 50000
+use_intelligent_selection: true
+enable_metrics: false
+enable_tracing: false

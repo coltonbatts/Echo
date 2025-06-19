@@ -11,15 +11,17 @@ Core functions include:
 All networking is performed with ``httpx`` using asyncio.
 """
 
-import os
 import asyncio
 import httpx
 from typing import List, Dict, Any, Optional
 from jsonschema import validate, ValidationError
+from backend.config import get_config
 
-MCP_SERVER_URLS = os.getenv("MCP_SERVER_URLS", "http://localhost:8001").split(",")
-MCP_DISCOVERY_TIMEOUT = float(os.getenv("MCP_DISCOVERY_TIMEOUT", "3"))
-MCP_EXECUTION_TIMEOUT = float(os.getenv("MCP_EXECUTION_TIMEOUT", "10"))
+config = get_config()
+
+MCP_SERVER_URLS = [s.url for s in config.mcp.servers] if config.mcp.servers else ["http://localhost:8001"]
+MCP_DISCOVERY_TIMEOUT = config.mcp.discovery_timeout
+MCP_EXECUTION_TIMEOUT = config.mcp.execution_timeout
 
 class MCPClientError(Exception):
     pass

@@ -1,0 +1,17 @@
+environment: development
+debug: true
+log_level: DEBUG
+mcp:
+  servers:
+    - url: http://localhost:8001
+      name: calculator
+      timeout: 10.0
+    - url: http://localhost:8002
+      name: file_operations
+      timeout: 10.0
+    - url: http://localhost:8003
+      name: web_search
+      timeout: 15.0
+    - url: http://localhost:8004
+      name: system_utilities
+      timeout: 10.0

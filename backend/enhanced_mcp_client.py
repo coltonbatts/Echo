@@ -9,7 +9,7 @@ This enhanced version provides:
 - Server capability detection
 """
 
-import os
+from backend.config import get_config
 import asyncio
 import httpx
 import time
@@ -25,14 +25,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configuration from environment
-MCP_SERVER_URLS = os.getenv("MCP_SERVER_URLS", "http://localhost:8001,http://localhost:8002,http://localhost:8003,http://localhost:8004").split(",")
-MCP_DISCOVERY_TIMEOUT = float(os.getenv("MCP_DISCOVERY_TIMEOUT", "5"))
-MCP_EXECUTION_TIMEOUT = float(os.getenv("MCP_EXECUTION_TIMEOUT", "15"))
-MCP_HEALTH_CHECK_INTERVAL = float(os.getenv("MCP_HEALTH_CHECK_INTERVAL", "30"))
-MCP_CACHE_TTL = float(os.getenv("MCP_CACHE_TTL", "300"))  # 5 minutes
-MCP_MAX_RETRIES = int(os.getenv("MCP_MAX_RETRIES", "3"))
-MCP_PARALLEL_LIMIT = int(os.getenv("MCP_PARALLEL_LIMIT", "10"))
+# Configuration from new config system
+config = get_config()
 
 class MCPClientError(Exception):
     """Enhanced MCP client error with more context"""
@@ -84,13 +78,14 @@ class EnhancedMCPClient:
     """Enhanced MCP client with advanced features"""
     
     def __init__(self):
-        self.servers = [url.strip() for url in MCP_SERVER_URLS if url.strip()]
+        # Use config for all settings
+        self.servers = [s.url for s in config.mcp.servers]
         self.server_health: Dict[str, ServerHealth] = {}
         self.tool_cache: Dict[str, ToolInfo] = {}
         self.schema_cache: Dict[str, Dict[str, Any]] = {}
         self.execution_cache: Dict[str, ExecutionResult] = {}
         self.last_discovery = 0
-        self.semaphore = asyncio.Semaphore(MCP_PARALLEL_LIMIT)
+        self.semaphore = asyncio.Semaphore(config.mcp.parallel_limit)
         
         # Initialize server health tracking
         for server in self.servers:
@@ -154,7 +149,7 @@ class EnhancedMCPClient:
         """Discover tools from a single server with enhanced metadata"""
         async with self.semaphore:
             try:
-                async with httpx.AsyncClient(timeout=MCP_DISCOVERY_TIMEOUT) as client:
+                async with httpx.AsyncClient(timeout=config.mcp.discovery_timeout) as client:
                     response = await client.get(f"{server_url.rstrip('/')}/tools")
                     response.raise_for_status()
                     tools_data = response.json()
@@ -231,7 +226,7 @@ class EnhancedMCPClient:
         current_time = time.time()
         
         # Check if we need to refresh
-        if not force_refresh and current_time - self.last_discovery < MCP_CACHE_TTL:
+        if not force_refresh and current_time - self.last_discovery < config.mcp.cache_ttl:
             # Return cached results
             cached_tools = {}
             for cache_key, tool in self.tool_cache.items():
@@ -278,7 +273,7 @@ class EnhancedMCPClient:
             return self.schema_cache[cache_key]
         
         try:
-            async with httpx.AsyncClient(timeout=MCP_DISCOVERY_TIMEOUT) as client:
+            async with httpx.AsyncClient(timeout=config.mcp.discovery_timeout) as client:
                 response = await client.get(f"{server_url.rstrip('/')}/tools/{tool_name}/schema")
                 response.raise_for_status()
                 schema = response.json()
@@ -294,22 +289,20 @@ class EnhancedMCPClient:
     async def execute_tool_with_retry(self, server_url: str, tool_name: str, 
                                     parameters: dict, max_retries: int = None) -> ExecutionResult:
         """Execute tool with retry logic and caching"""
-        if max_retries is None:
-            max_retries = MCP_MAX_RETRIES
-        
-        start_time = time.time()
-        last_error = None
-        
-        for attempt in range(max_retries + 1):
+        cache_key = self.get_cache_key("execute_tool", server_url, tool_name, str(parameters))
+        if cache_key in self.execution_cache:
+            result = self.execution_cache[cache_key]
+            if (datetime.now() - result.timestamp).total_seconds() < config.mcp.cache_ttl:
+                return result
+
+        attempt = 0
+        retries = max_retries if max_retries is not None else config.mcp.max_retries
+        while attempt <= retries:
+            start_time = time.time()
             try:
-                # Validate parameters
-                schema = await self.get_tool_schema_cached(server_url, tool_name)
-                validate(instance=parameters, schema=schema)
-                
-                # Execute tool
-                async with httpx.AsyncClient(timeout=MCP_EXECUTION_TIMEOUT) as client:
+                async with httpx.AsyncClient(timeout=config.mcp.execution_timeout) as client:
                     response = await client.post(
-                        f"{server_url.rstrip('/')}/tools/{tool_name}/execute",
+                        f"{server_url.rstrip('/')}/execute/{tool_name}",
                         json=parameters
                     )
                     response.raise_for_status()
@@ -511,4 +504,5 @@ async def execute_tool(server_url: str, tool_name: str, parameters: dict) -> Dic
 
 def list_mcp_servers() -> List[str]:
     """List configured MCP servers"""
-    return [url.strip() for url in MCP_SERVER_URLS if url.strip()]
+    config = get_config()
+    return [s.url for s in config.mcp.servers]
