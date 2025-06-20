@@ -4,6 +4,42 @@
 
 **A modular AI infrastructure platform for creative technologists.**
 
+## ⚙️ Centralized Configuration System (v1.1)
+
+Echo now uses a robust, centralized configuration system based on **Pydantic v2** and **YAML** files, supporting layered overrides via environment variables and `.env` files.
+
+### How It Works
+- **YAML files** in `config/` provide base, development, and production configs.
+- **Environment variables** and a local `.env` file can override any setting (see `.env.example`).
+- All config is validated and loaded via Pydantic models for type safety and reliability.
+
+### Onboarding Steps
+1. **Copy `.env.example` to `.env`** and fill in required secrets and API keys.
+2. **Review and customize YAML configs** in `config/` as needed for your environment.
+3. **Install dependencies:**
+   ```sh
+   pip install -r backend/requirements.txt
+   pip install pydantic-settings
+   ```
+4. **Run tests:**
+   ```sh
+   PYTHONPATH=. pytest tests/test_configuration.py
+   ```
+
+### Configuration Structure
+- **config/base.yaml**: Default settings for all environments.
+- **config/development.yaml**: Development overrides (debug, local MCP servers, etc).
+- **config/production.yaml**: Production overrides (rate limits, feature flags, etc).
+- **.env**: Local secrets and environment-specific overrides (never commit this file).
+
+**Precedence:**
+1. Environment variables / `.env`
+2. YAML (environment-specific)
+3. YAML (base)
+
+### Example
+See `.env.example` and YAML files in `config/` for all available settings and documentation.
+
 ---
 
 **Version 0.1 – June 18, 2025**

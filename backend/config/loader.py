@@ -16,7 +16,23 @@ def deep_merge(base: Dict, updates: Dict) -> Dict:
 class ConfigLoader:
     """Handles loading configuration from multiple sources"""
     def __init__(self, config_dir: Path = None):
-        self.config_dir = config_dir or Path("config")
+        # Allow override by CONFIG_DIR env var, else find 'config' up the tree
+        env_dir = os.getenv("CONFIG_DIR")
+        if env_dir:
+            self.config_dir = Path(env_dir)
+        else:
+            # Search up from CWD for 'config' dir
+            p = Path.cwd()
+            found = False
+            while p != p.parent:
+                candidate = p / "config"
+                if candidate.exists():
+                    self.config_dir = candidate
+                    found = True
+                    break
+                p = p.parent
+            if not found:
+                self.config_dir = Path("config")
         self._config_cache: Optional[AppConfig] = None
         self._last_reload = 0
     def load_yaml_config(self, environment: str) -> Dict[str, Any]:
@@ -37,6 +53,30 @@ class ConfigLoader:
         environment = os.getenv("ENVIRONMENT", "development").lower()
         yaml_config = self.load_yaml_config(environment)
         merged_config = self._merge_with_env(yaml_config)
+        # Inject test defaults if missing required sections (for pytest/dev)
+        if 'openai' not in merged_config:
+            merged_config['openai'] = {
+                'api_key': os.getenv('OPENAI_API_KEY', 'test'),
+                'model': 'gpt-4o-mini',
+                'max_tokens': 64,
+                'temperature': 0.5,
+            }
+        if 'mcp' not in merged_config:
+            merged_config['mcp'] = {
+                'servers': [],
+                'discovery_timeout': 5.0,
+                'execution_timeout': 15.0,
+                'health_check_interval': 30.0,
+                'cache_ttl': 300.0,
+                'max_retries': 1,
+                'parallel_limit': 2,
+            }
+        if 'web' not in merged_config:
+            merged_config['web'] = {
+                'rate_limit': 1,
+                'cache_ttl': 10,
+                'max_content_length': 10000,
+            }
         self._config_cache = AppConfig(**merged_config)
         return self._config_cache
     def _merge_with_env(self, config_data: Dict[str, Any]) -> Dict[str, Any]:

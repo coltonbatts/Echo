@@ -49,11 +49,53 @@ function TerminalMessage({ text, sender, typewriter }) {
   );
 }
 
+function ToolUsageDisplay({ tool }) {
+  return (
+    <div className="mb-2 px-3 py-2 rounded bg-green-950/50 text-green-300 text-xs font-mono border border-green-800 max-w-[90%] mr-auto">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="inline-block w-2 h-2 bg-green-400 rounded-full"></span>
+        <span className="font-semibold text-green-200">Tool: {tool.name}</span>
+        {tool.execution_time && (
+          <span className="text-green-600">({tool.execution_time}ms)</span>
+        )}
+      </div>
+      {tool.parameters && Object.keys(tool.parameters).length > 0 && (
+        <div className="text-green-600 mb-1">
+          Params: {JSON.stringify(tool.parameters, null, 0)}
+        </div>
+      )}
+      {tool.result && (
+        <div className="text-green-400 break-words">
+          Result: {typeof tool.result === 'string' ? tool.result : JSON.stringify(tool.result, null, 2)}
+        </div>
+      )}
+      {tool.confidence && (
+        <div className="text-green-600 mt-1">
+          Confidence: {Math.round(tool.confidence * 100)}%
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ToolErrorDisplay({ error }) {
+  return (
+    <div className="mb-2 px-3 py-2 rounded bg-red-950/50 text-red-300 text-xs font-mono border border-red-800 max-w-[90%] mr-auto">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="inline-block w-2 h-2 bg-red-400 rounded-full"></span>
+        <span className="font-semibold text-red-200">Tool Error: {error.name}</span>
+      </div>
+      <div className="text-red-400 break-words">
+        {error.error}
+      </div>
+    </div>
+  );
+}
+
 export default function ChatBox() {
-  const [messages, setMessages] = useState([]); // {sender, text}
+  const [messages, setMessages] = useState([]); // {sender, text, tools_used?, tool_errors?}
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const chatRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -68,7 +110,6 @@ export default function ChatBox() {
     if (!input.trim() || loading) return;
     setMessages((msgs) => [...msgs, { sender: "user", text: input }]);
     setLoading(true);
-    setError("");
     const userMsg = input;
     setInput("");
     try {
@@ -81,14 +122,21 @@ export default function ChatBox() {
       const data = await res.json();
       setMessages((msgs) => [
         ...msgs,
-        { sender: "assistant", text: data.response, typewriter: true },
+        { 
+          sender: "assistant", 
+          text: data.response, 
+          typewriter: true,
+          tools_used: data.tools_used || [],
+          tool_errors: data.tool_errors || [],
+          processing_time: data.processing_time,
+          model_used: data.model_used
+        },
       ]);
     } catch {
       setMessages((msgs) => [
         ...msgs,
         { sender: "assistant", text: "[Echo] Backend unavailable. Please try again.", typewriter: false },
       ]);
-      setError("Backend unavailable");
     } finally {
       setLoading(false);
       inputRef.current && inputRef.current.focus();
@@ -108,7 +156,37 @@ export default function ChatBox() {
           </div>
         )}
         {messages.map((msg, i) => (
-          <TerminalMessage key={i} text={msg.text} sender={msg.sender === "assistant" ? "assistant" : "user"} typewriter={msg.typewriter && msg.sender === "assistant"} />
+          <div key={i} className="mb-2">
+            {/* Show tool usage before assistant response */}
+            {msg.tools_used && msg.tools_used.length > 0 && (
+              <div className="mb-2">
+                {msg.tools_used.map((tool, idx) => (
+                  <ToolUsageDisplay key={idx} tool={tool} />
+                ))}
+              </div>
+            )}
+            {/* Show tool errors if any */}
+            {msg.tool_errors && msg.tool_errors.length > 0 && (
+              <div className="mb-2">
+                {msg.tool_errors.map((error, idx) => (
+                  <ToolErrorDisplay key={idx} error={error} />
+                ))}
+              </div>
+            )}
+            {/* Main message */}
+            <TerminalMessage 
+              text={msg.text} 
+              sender={msg.sender === "assistant" ? "assistant" : "user"} 
+              typewriter={msg.typewriter && msg.sender === "assistant"} 
+            />
+            {/* Show processing time for assistant messages */}
+            {msg.sender === "assistant" && msg.processing_time && (
+              <div className="text-green-700 text-xs mt-1 opacity-60">
+                Processed in {msg.processing_time}s
+                {msg.model_used && ` using ${msg.model_used}`}
+              </div>
+            )}
+          </div>
         ))}
         {loading && (
           <div className="text-green-400 italic mt-2 opacity-80">Echo is thinking<span style={blinkStyle}>█</span></div>
